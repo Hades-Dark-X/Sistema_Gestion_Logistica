@@ -1,0 +1,379 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <list>
+#include <algorithm>
+#include <map>
+#include <unordered_map>
+
+using namespace std;
+
+// Estructura para representar un pedido
+struct Pedido {
+    string id;
+    string descripcion;
+    string idVehiculo; // Agregamos un campo para el id del vehiculo asignado
+};
+
+// Estructura para representar un vehiculo
+struct Vehiculo {
+    string id;
+    string descripcion;
+    bool disponible;
+};
+
+// Estructura para representar un almacen
+struct Almacen {
+    string id; // ID del almacen
+    string descripcion; // Descripcion del almacen
+    int cantidad; // Cantidad de productos en el almacen
+};
+
+// Árbol para almacenar los pedidos (map ordenado por ID)
+std::map<std::string, Pedido> pedidos_map;
+
+// Grafo para almacenar los vehiculos (mapa no ordenado con listas de adyacencia)
+std::unordered_map<std::string, std::list<Vehiculo>> vehiculos_graph;
+
+// Basado en el árbol de pedidos usare la misma estructura no lineal para los almacenes
+std::map<std::string, Almacen> almacenes_map;
+
+void agregarPedido() {
+    Pedido nuevoPedido;
+
+    cout << "Ingrese el ID del pedido: ";
+    cin >> nuevoPedido.id;
+    cin.ignore(); // Para limpiar el buffer de entrada
+
+    // Verificamos si ya existe un pedido con el mismo ID
+    if (pedidos_map.find(nuevoPedido.id) != pedidos_map.end()) {
+        cout << "Ya existe un pedido con ese ID. Ingrese otro ID." << endl;
+        return;
+    }
+
+    cout << "Ingrese la descripcion del pedido: ";
+    getline(cin, nuevoPedido.descripcion);
+
+    // Inicialmente, no hay ningún vehículo asignado al pedido
+    nuevoPedido.idVehiculo = "";
+
+    // Agregamos el pedido al árbol de pedidos
+    pedidos_map[nuevoPedido.id] = nuevoPedido;
+
+    cout << "Pedido agregado exitosamente." << endl;
+}
+
+// Función para eliminar un pedido
+void eliminarPedido() {
+    string idPedido;
+    cout << "Ingrese el ID del pedido a eliminar: ";
+    cin >> idPedido;
+
+    // Eliminamos el pedido del árbol
+    if (pedidos_map.erase(idPedido) > 0) {
+        cout << "Pedido eliminado exitosamente." << endl;
+    } else {
+        cout << "No se encontró el pedido con el ID ingresado." << endl;
+    }
+}
+
+// Función para modificar un pedido
+void modificarPedido() {
+    string idPedido;
+    cout << "Ingrese el ID del pedido a modificar: ";
+    cin >> idPedido;
+
+    // Buscamos el pedido en el árbol
+    auto itPedido = pedidos_map.find(idPedido);
+
+    if (itPedido != pedidos_map.end()) {
+        cout << "Ingrese la nueva descripcion del pedido: ";
+        cin.ignore();
+        getline(cin, itPedido->second.descripcion);
+        cout << "Pedido modificado exitosamente." << endl;
+    } else {
+        cout << "No se encontró el pedido con el ID ingresado." << endl;
+    }
+}
+
+// Funcion para gestionar un pedido
+void gestionarPedido() {
+    int opcion;
+
+    do {
+        cout << "\nGestion de Pedidos\n";
+        cout << "1. Agregar pedido\n";
+        cout << "2. Eliminar pedido\n";
+        cout << "3. Modificar pedido\n";
+        cout << "4. Volver al menu principal\n";
+        cout << "Ingrese la opcion deseada: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                agregarPedido();
+                break;
+            case 2:
+                eliminarPedido();
+                break;
+            case 3:
+                modificarPedido();
+                break;
+            case 4:
+                break;
+            default:
+                cout << "Opcion no valida. Por favor, intente de nuevo.\n";
+                break;
+        }
+    } while (opcion != 4);
+}
+
+// Funcion para eliminar un vehiculo
+void eliminarVehiculo() {
+    string id;
+    cout << "Ingrese el ID del vehiculo a eliminar: ";
+    cin >> id;
+
+    // Eliminamos el vehiculo del grafo
+    if (vehiculos_graph.erase(id) > 0) {
+        cout << "Vehiculo eliminado exitosamente." << endl;
+    } else {
+        cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
+    }
+}
+
+// Función para agregar un vehiculo
+void agregarVehiculo() {
+    Vehiculo nuevoVehiculo;
+
+    cout << "Ingrese el ID del vehiculo: ";
+    cin >> nuevoVehiculo.id;
+    cin.ignore(); // Para limpiar el buffer de entrada
+
+    cout << "Ingrese la descripcion del vehiculo: ";
+    getline(cin, nuevoVehiculo.descripcion);
+
+    nuevoVehiculo.disponible = true;
+
+    // Agregamos el vehiculo al grafo
+    vehiculos_graph[nuevoVehiculo.id].push_back(nuevoVehiculo); 
+
+    cout << "Vehiculo agregado exitosamente." << endl;
+}
+
+// Funcion para modificar un vehiculo
+void modificarVehiculo() {
+    string id;
+    cout << "Ingrese el ID del vehiculo a modificar: ";
+    cin >> id;
+
+    auto it = vehiculos_graph.find(id);
+    if (it != vehiculos_graph.end()) {
+        for (auto& vehiculo : it->second) { // Iteramos sobre la lista de vehículos con el mismo ID
+            if (vehiculo.id == id) {
+                cout << "Ingrese la nueva descripcion del vehiculo: ";
+                cin.ignore();
+                getline(cin, vehiculo.descripcion);
+
+                cout << "Vehiculo modificado exitosamente." << endl;
+                return;
+            }
+        }
+    }
+
+    cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
+}
+
+// Funcion para gestionar un vehiculo
+void gestionarVehiculo() {
+    int opcion;
+
+    do {
+        cout << "\n1. Agregar vehiculo\n2. Eliminar vehiculo\n3. Modificar vehiculo\n4. Regresar al menu principal\nIngrese una opcion: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                agregarVehiculo();
+                break;
+            case 2:
+                eliminarVehiculo();
+                break;
+            case 3:
+                modificarVehiculo();
+                break;
+            case 4:
+                break;
+            default:
+                cout << "Opcion no valida. Intente de nuevo." << endl;
+                break;
+        }
+    } while (opcion != 4);
+}
+
+
+// Funcion para asignar un vehiculo a un pedido
+void asignarVehiculo() {
+    string idPedido, idVehiculo;
+    cout << "Ingrese el ID del pedido: ";
+    cin >> idPedido;
+    cout << "Ingrese el ID del vehiculo: ";
+    cin >> idVehiculo;
+
+    // Buscamos el pedido en el árbol de pedidos
+    auto itPedido = pedidos_map.find(idPedido);
+    // Buscamos el vehiculo en el grafo
+    auto itVehiculo = vehiculos_graph.find(idVehiculo);
+
+    if (itPedido != pedidos_map.end() && itVehiculo != vehiculos_graph.end()) {
+        for (auto& vehiculo : itVehiculo->second) { // Iteramos sobre la lista de vehículos con el mismo ID
+            if (vehiculo.disponible) {
+                itPedido->second.idVehiculo = idVehiculo;
+                vehiculo.disponible = false;
+                cout << "Vehiculo asignado exitosamente al pedido." << endl;
+                return;
+            }
+        }
+        cout << "No hay vehículos disponibles con ese ID." << endl;
+    } else {
+        cout << "No se pudo asignar el vehiculo al pedido. Verifique los IDs ingresados." << endl;
+    }
+}
+
+// Funcion para consultar el estado de un envio
+void consultarEstado() {
+    string idPedido;
+    cout << "Ingrese el ID del pedido: ";
+    cin >> idPedido;
+
+    // Buscamos el pedido en el árbol de pedidos
+    auto itPedido = pedidos_map.find(idPedido);
+
+    if (itPedido != pedidos_map.end()) {
+        cout << "ID del pedido: " << itPedido->first << endl;
+        cout << "Descripcion del pedido: " << itPedido->second.descripcion << endl;
+        cout << "ID del vehiculo asignado: " << (itPedido->second.idVehiculo.empty() ? "Ninguno" : itPedido->second.idVehiculo) << endl;
+    } else {
+        cout << "No se encontró el pedido con el ID ingresado." << endl;
+    }
+}
+
+// Funcion para planificar una ruta de transporte
+void planificarRuta() {
+    string idPedido;
+    cout << "Ingrese el ID del pedido para el que se planificara la ruta: ";
+    cin >> idPedido;
+
+    // Buscamos el pedido en el árbol de pedidos
+    auto itPedido = pedidos_map.find(idPedido);
+
+    // Verificamos que el pedido exista y que tenga un vehículo asignado
+    if (itPedido != pedidos_map.end() && !itPedido->second.idVehiculo.empty()) {
+        // Aquí iría la lógica para planificar la ruta, 
+        // utilizando itPedido->second para acceder a los datos del pedido
+
+        // Ejemplo (lógica simplificada):
+        string idVehiculoAsignado = itPedido->second.idVehiculo;
+        cout << "Ruta planificada para el pedido " << idPedido 
+             << " con el vehiculo " << idVehiculoAsignado << endl;
+
+        // ... (Lógica real de planificación de ruta)
+
+    } else {
+        cout << "No se pudo planificar la ruta. Verifique que el ID del pedido es correcto y que tiene un vehiculo asignado." << endl;
+    }
+}
+
+// Funcion para verificar la disponibilidad de vehiculos
+void verificarDisponibilidad() {
+    for (const auto& pair : vehiculos_graph) {
+        for (const auto& vehiculo : pair.second) {
+            if (vehiculo.disponible) {
+                cout << "ID del vehiculo: " << vehiculo.id << endl;
+                cout << "Descripcion del vehiculo: " << vehiculo.descripcion << endl;
+            }
+        }
+    }
+}
+
+// Funcion para actualizar la informacion de un almacen
+void actualizarAlmacen() {
+    string idAlmacen;
+    int nuevaCantidad;
+
+    cout << "Ingrese el ID del almacen: ";
+    cin >> idAlmacen;
+
+    // Buscamos el almacen en el mapa de almacenes
+    auto itAlmacen = almacenes_map.find(idAlmacen);
+
+    // Verificamos que el almacen exista
+    if (itAlmacen != almacenes_map.end()) {
+        // Solicitamos la nueva cantidad de productos en el almacen
+        cout << "Ingrese la nueva cantidad de productos en el almacen: ";
+        cin >> nuevaCantidad;
+
+        // Actualizamos la cantidad de productos en el almacen
+        itAlmacen->second.cantidad = nuevaCantidad;
+
+        cout << "Informacion del almacen actualizada exitosamente." << endl;
+    } else {
+        cout << "No se encontro el almacen con el ID ingresado." << endl;
+    }
+}
+
+
+// Funcion para salir del sistema
+void salir() {
+    // Aqui iria la logica para salir del sistema
+}
+
+int main() {
+    int opcion;
+
+    do {
+        cout << "\nSistema de Gestion Logistica\n";
+        cout << "1. Gestionar pedido\n";
+        cout << "2. Gestionar vehiculo\n";
+        cout << "3. Asignar vehiculo a pedido\n";
+        cout << "4. Consultar estado de envio\n";
+        cout << "5. Planificar ruta de transporte\n";
+        cout << "6. Verificar disponibilidad de vehiculos\n";
+        cout << "7. Actualizar informacion de almacen\n";
+        cout << "8. Salir\n";
+        cout << "Ingrese la opcion deseada: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                gestionarPedido();
+                break;
+            case 2:
+                gestionarVehiculo();
+                break;
+            case 3:
+                asignarVehiculo();
+                break;
+            case 4:
+                consultarEstado();
+                break;
+            case 5:
+                planificarRuta();
+                break;
+            case 6:
+                verificarDisponibilidad();
+                break;
+            case 7:
+                actualizarAlmacen();
+                break;
+            case 8:
+                salir();
+                break;
+            default:
+                cout << "Opcion no valida. Por favor, intente de nuevo.\n";
+                break;
+        }
+    } while (opcion != 8);
+
+    return 0;
+}
