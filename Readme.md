@@ -3,7 +3,7 @@
  </p>
 
 <p>
-Inicialmente, se realizó un análisis preliminar del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema manejaba la información de pedidos, vehículos y almacenes. Se detectó que la función de actualización de almacenes, actualizarAlmacen(), dependía de un std::vector para almacenar la información, una elección que, si bien funcional, presenta limitaciones significativas
+Inicialmente, se realizó un análisis preliminar del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema manejaba la información de pedidos, vehículos y almacenes. Se detectó que la función de actualizarAlmacen(), dependía de un std::vector para almacenar la información, una elección que, si bien funcional, presenta limitaciones significativas
 </p>
 
 <p>
@@ -124,16 +124,18 @@ Con un vector como una lista tenemos que recorrer forzosamente nodo por nodo has
 Con un árbol binario lo que podemos es ir realizando un descarte de datos en este caso se hace un descarte por medio del id del almacén comparando si es mayor o menor que el nodo actual para realizar un descarte más rápido y por ende eficiente.
 </p>
 
-<p>
-Si se implementa en próximas versiones las funciones de agregarAlmacen, eliminarAlmacen y gestionarAlmacen estas funciones se van a ver beneficiadas de la eficacia del árbol.
-</p>
+### Análisis de funcionalidades
 
-### Reflexión.
+- Identifica el método de ordenamiento utilizado implícitamente en la estructura de datos no lineal `std::map<std::string, Pedido> pedidos_map;`
 
-<p>
-Este trabajo representó un reto primero para identificar que estructuras estaban implementadas en el código, para después entender; cómo trabajaban estructuras lineales, como pueden ser pilas, colas y listas.
-</p>
+- Aquí debo mencionar que la estructura no cuenta con un algoritmo de ordenamiento como pueden ser; Bubble Sort, Select Sort o Insertion Sort por mencionar algunos.
 
-<p>
-Otro desafío fue enfrentar el hecho de que la funcionalidad de actualizarAlmacen parecía no tener relación con alguna parte funcional del código esto hasta que te das cuenta de queque el software se encuentra incompleto en su funcionalidad y falta dotarlo de más características.
-</p>
+- El ordenamiento implícito se lo otorga la estructura no lineal con la que se están almacenando los datos que en este caso es un Árbol binario, el ordenamiento se realiza de manera ascendente por medio del ID del pedido.
+
+### Examina la función actualizarAlmacen() y comprende su propósito
+
+- Anteriormente la estuctura que almacenaba los datos de actualizarAlmacen era un vector como se explico con anterioridad, su propósito es guardar los datos de los almacenes.
+
+- Como ya se ha comentado al llevar a cabo su función por medio de un vector esto se vuelve ineficiente a medida que tenemos más y más datos en los almecenes.
+
+- Para resolver este inconveniente se implemento un árbol binario auto- balanceado, dondé el ordenameinto se sigue llevando por medio del id de los almacenes.

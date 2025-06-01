@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <map>
 #include <unordered_map>
+#include <cstdlib> // Necesario para la función salir
 
 using namespace std;
 
@@ -296,36 +297,132 @@ void verificarDisponibilidad() {
     }
 }
 
+// Funcion para agregar almacen
+void agregarAlmacen() {
+    Almacen nuevoAlmacen;
+    cout << "Ingrese el ID del almacen: ";
+    cin >> nuevoAlmacen.id;
+    cin.ignore(); // Para limpiar el buffer
+
+    if (almacenes_map.count(nuevoAlmacen.id)) {
+        cout << "Ya existe un almacen con ese ID." << endl;
+        return;
+    }else{
+        cout << "Ingrese la descripcion del almacen: ";
+        getline(cin, nuevoAlmacen.descripcion);
+        cout << "Ingrese la cantidad inicial de productos: ";
+        cin >> nuevoAlmacen.cantidad;
+
+        almacenes_map[nuevoAlmacen.id] = nuevoAlmacen;
+        cout << "Almacen agregado exitosamente." << endl;
+    }
+}
+
+// Función para listar todos los almacenes (ya estarán ordenados por ID)
+void listarAlmacenes() {
+    if (almacenes_map.empty()) {
+        cout << "No hay almacenes registrados." << endl;
+        return;
+    }
+    for (const auto& pair : almacenes_map) {
+        cout << "ID: " << pair.first
+             << ", Descripcion: " << pair.second.descripcion
+             << ", Cantidad: " << pair.second.cantidad << endl;
+    }
+}
+
+
 // Funcion para actualizar la informacion de un almacen
 void actualizarAlmacen() {
     string idAlmacen;
-    int nuevaCantidad;
 
     cout << "Ingrese el ID del almacen: ";
     cin >> idAlmacen;
+     cin.ignore();
 
     // Buscamos el almacen en el mapa de almacenes
     auto itAlmacen = almacenes_map.find(idAlmacen);
 
     // Verificamos que el almacen exista
     if (itAlmacen != almacenes_map.end()) {
-        // Solicitamos la nueva cantidad de productos en el almacen
-        cout << "Ingrese la nueva cantidad de productos en el almacen: ";
+
+        string nuevaDescripcion;
+        cout << "Ingrese la nueva descripcion del almacen (deje vacio para no cambiar): ";
+        getline(cin, nuevaDescripcion);
+
+        // Solo actualiza si el usuario ingresó algo
+        if (!nuevaDescripcion.empty()) { 
+            itAlmacen->second.descripcion = nuevaDescripcion;
+            cout << "Descripcion del almacen actualizada exitosamente." << endl;
+        }
+
+        int nuevaCantidad;
+        cout << "Ingrese la nueva cantidad de productos en el almacen (o -1 para no cambiar): ";
         cin >> nuevaCantidad;
 
-        // Actualizamos la cantidad de productos en el almacen
-        itAlmacen->second.cantidad = nuevaCantidad;
-
-        cout << "Informacion del almacen actualizada exitosamente." << endl;
+        if (nuevaCantidad != -1) {
+            itAlmacen->second.cantidad = nuevaCantidad;
+            cout << "Cantidad de productos del almacen actualizada exitosamente." << endl;
+        }
+          cout << "Informacion del almacen actualizada exitosamente." << endl; 
     } else {
         cout << "No se encontro el almacen con el ID ingresado." << endl;
     }
 }
 
 
+// Funcion para eliminar almacen
+void eliminarAlmacen() {
+    string idAlmacen;
+    cout << "Ingrese el ID del almacen a eliminar: ";
+    cin >> idAlmacen;
+
+    if (almacenes_map.erase(idAlmacen) > 0) {
+        cout << "Almacen eliminado exitosamente." << endl;
+    } else {
+        cout << "No se encontro el almacen con el ID ingresado." << endl;
+    }
+}
+
+void gestionarAlmacenes() {
+    int opcion;
+    do {
+        cout << "\nGestion de Almacenes\n";
+        cout << "1. Agregar Almacen\n";
+        cout << "2. Listar Almacenes \n";
+        cout << "3. Actualizar Informacion de Almacen\n";
+        cout << "4. Eliminar Almacen\n";
+        cout << "5. Volver al menu principal\n"; // La opción para salir es 5
+        cout << "Ingrese la opcion deseada: ";
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                agregarAlmacen();
+                break;
+            case 2:
+                listarAlmacenes();
+                break;
+            case 3:
+                actualizarAlmacen();
+                break;
+            case 4:
+                eliminarAlmacen();
+                break;
+            case 5:
+                break;
+            default:
+                cout << "Opcion no valida. Intente de nuevo." << endl;
+        }
+    } while (opcion != 5);
+}
+
+
 // Funcion para salir del sistema
 void salir() {
-    // Aqui iria la logica para salir del sistema
+    std::cout << "Saliendo del programa..." << std::endl;
+    // Llama a exit() con un código de estado. 0 indica una salida exitosa.
+    exit(0);
 }
 
 int main() {
@@ -339,7 +436,7 @@ int main() {
         cout << "4. Consultar estado de envio\n";
         cout << "5. Planificar ruta de transporte\n";
         cout << "6. Verificar disponibilidad de vehiculos\n";
-        cout << "7. Actualizar informacion de almacen\n";
+        cout << "7. Gestionar almacen\n";
         cout << "8. Salir\n";
         cout << "Ingrese la opcion deseada: ";
         cin >> opcion;
@@ -364,7 +461,7 @@ int main() {
                 verificarDisponibilidad();
                 break;
             case 7:
-                actualizarAlmacen();
+                gestionarAlmacenes();
                 break;
             case 8:
                 salir();
