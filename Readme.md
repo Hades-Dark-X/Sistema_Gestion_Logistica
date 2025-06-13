@@ -1,13 +1,15 @@
-<p>
- Se detalla el proceso de análisis, mejora e implementación realizado sobre el Sistema de Gestión Logística (SGL), específicamente en su versión SGL_U2.cpp. El objetivo principal de este proyecto es optimizar la eficiencia del SGL, enfocándose inicialmente en la gestión de almacenes, un componente crítico para las operaciones logísticas.
- </p>
+# Análisis Inicial y Detección de Limitaciones
 
 <p>
-Inicialmente, se realizó un análisis preliminar del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema manejaba la información de pedidos, vehículos y almacenes. Se detectó que la función de actualizarAlmacen(), dependía de un std::vector para almacenar la información, una elección que, si bien funcional, presenta limitaciones significativas
+Comence con un análisis del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema maneja la información de pedidos, vehículos y almacenes. Durante esta fase, me percate de una limitación significativa en la función actualizarAlmacen(), que dependía de un std::vector para almacenar la información de los almacenes. Si bien  es funcional, esta elección presenta inconvenientes de eficiencia a medida que el volumen de datos aumenta.
 </p>
 
 <p>
-De igual manera se pretende que el estudiante se adrente a lo que son las estructuras lineales y no lineales, para que sea capaz de manejar tipos de datos abstractos más complejos.
+Como parte de este proyecto, se busca que el estudiante se familiarice con las estructuras de datos lineales y no lineales, lo que le permitirá manejar tipos de datos abstractos más complejos y mejorar el rendimiento del software.
+</p>
+
+<p>
+A continuación, se presenta una descripción de las estructuras de datos relevantes utilizadas y sus implicaciones:
 </p>
 
 ---
@@ -48,7 +50,13 @@ De igual manera se pretende que el estudiante se adrente a lo que son las estruc
 | Estructura no lineal              |                                                                                                                                                                                                             |
 | `std::map<std::string`            | Ahora `map::find` realiza una búsqueda logarítmica (mucho más rápida para grandes cantidades de datos) para encontrar el almacén por su ID.                                                                 |
 
-### Función original `actualizarAlmacen`
+### Optimización de la Gestión de Almacenes
+
+<p>
+La mejora actual se centra en la función actualizarAlmacen, donde hemos pasado de utilizar un std::vector a un std::map<std::string, Almacen>. Esta elección estratégica de una estructura de datos no lineal (árbol de búsqueda) sentará las bases para futuras implementaciones de las funciones de agregar, eliminar y gestionar almacenes, dotando al software de mayor funcionalidad, versatilidad y robustez.
+</p>
+
+<p>Código Comparativo:</p>
 
 ```C++
 void actualizarAlmacen() {
@@ -77,7 +85,7 @@ if (itAlmacen != almacenes.end()) {
 }
 ```
 
-### Código con un árbol para hacer el código más eficiente en la búsqueda y actualización de almacenes
+### Código con la aplicación de la mejora
 
 ```C++
 void actualizarAlmacen() {
@@ -106,8 +114,20 @@ if (itAlmacen != almacenes_map.end()) {
 }
 ```
 
+| Estructura                        | Búsqueda | Insersión                                                                                                        | Problema             | Posible Mejora                                 |
+| --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------- |
+| `std::vector<Almacen> almacenes;` | O(n)     | O(n) ordena los elementos de manera secuencial; es decir, al final de la lista o arreglo                         | La búsqueda es lenta | `std::map<std::string, Almacen> almacenes_map` |
+| `map<string, Pedido>`             | O(log n) | O(log n) Compara el dato con los que ya tiene y decide si va a la "izquierda" o a la "derecha" en su estructura. | N/A                  | Es óptimo                                      |
+| `std::unordered_map`              | O(1) avg | O (1) avg ordena los datos mediante una clave y un valor                                                         | N/A                  | Es eficiente                                   |
+
 <p>
-La mejora actual se centra en mejorar la búsqueda para la función actualizarAlmacen, la elección de un **árbol** **sentará las bases para futuras implementaciones** de agregar, eliminar y gestionar. Que es lo que dotará de mayor funcionalidad, versatilidad y robustez al software en su conjunto
+¿Por qué un árbol es más eficiente?
+
+Un árbol, al ser una estructura de datos dinámica y no lineal, permite un recorrido y búsqueda de datos considerablemente más eficiente que una estructura lineal como un std::vector (lista o arreglo).
+
+- Con un std::vector: Para encontrar un elemento específico, el sistema debe recorrer cada nodo uno por uno (O(n)), lo que resulta ineficiente si el elemento deseado se encuentra al final de la lista o si hay una gran cantidad de datos.
+
+- Con un árbol binario (como std::map): Se realiza un descarte de datos de manera logarítmica (O(log n)). Por ejemplo, al buscar un almacén por su ID, el árbol compara el ID buscado con el nodo actual y decide si debe ir a la rama izquierda o derecha, descartando rápidamente la mitad de los datos restantes en cada paso. Esto se traduce en una búsqueda y actualización mucho más rápida, especialmente con grandes volúmenes de información.
 </p>
 
 ### ¿Cómo es que un árbol es más eficiente?
