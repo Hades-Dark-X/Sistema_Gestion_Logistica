@@ -41,7 +41,6 @@ std::map<std::string, Almacen> almacenes_map;
 
 void agregarPedido() {
     Pedido nuevoPedido;
-
     cout << "Ingrese el ID del pedido: ";
     cin >> nuevoPedido.id;
     cin.ignore(); // Para limpiar el buffer de entrada
@@ -97,6 +96,23 @@ void modificarPedido() {
     }
 }
 
+// Implementacion de la funcion buscarPedido
+void buscarPedido() {
+    // Solicitamos el ID del pedido
+    std::string idPedido;
+    std::cout << "Ingrese el ID del pedido que desea buscar: ";
+    std::cin >> idPedido;
+
+    // Realizamos la busqueda en el mapa
+    auto it = pedidos_map.find(idPedido);
+
+    if (it != pedidos_map.end()) {
+        std::cout << "Descripcion del pedido: " << it->second.descripcion << std::endl;
+    } else {
+        std::cout << "El pedido no existe" << std::endl;
+    }
+}
+
 // Funcion para gestionar un pedido
 void gestionarPedido() {
     int opcion;
@@ -104,9 +120,10 @@ void gestionarPedido() {
     do {
         cout << "\nGestion de Pedidos\n";
         cout << "1. Agregar pedido\n";
-        cout << "2. Eliminar pedido\n";
-        cout << "3. Modificar pedido\n";
-        cout << "4. Volver al menu principal\n";
+        cout << "2. Buscar pedido\n";
+        cout << "3. Eliminar pedido\n";
+        cout << "4. Modificar pedido\n";
+        cout << "5. Volver al menu principal\n";
         cout << "Ingrese la opcion deseada: ";
         cin >> opcion;
 
@@ -115,18 +132,20 @@ void gestionarPedido() {
                 agregarPedido();
                 break;
             case 2:
-                eliminarPedido();
+                buscarPedido();
                 break;
             case 3:
-                modificarPedido();
+                eliminarPedido();
                 break;
             case 4:
+                modificarPedido();
+            case 5:
                 break;
             default:
                 cout << "Opcion no valida. Por favor, intente de nuevo.\n";
                 break;
         }
-    } while (opcion != 4);
+    } while (opcion != 5);
 }
 
 // Funcion para eliminar un vehiculo
@@ -185,12 +204,42 @@ void modificarVehiculo() {
     cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
 }
 
+// Función para buscar un vehiculo
+void buscarVehiculo() {
+    // Solicitamos el ID del vehículo
+    std::string idVehiculo;
+    std::cout << "Ingrese el ID del vehiculo que desea buscar: ";
+    std::cin >> idVehiculo;
+
+    // Realizamos la busqueda en el grafo de vehiculos
+    auto it = vehiculos_graph.find(idVehiculo);
+
+    if (it != vehiculos_graph.end()) {
+        // En un grafo, la clave es el ID, y el valor es una lista de vehículos.
+        if (!it->second.empty()) {
+            const Vehiculo& vehiculoEncontrado = it->second.front(); // Tomamos el primer vehículo en la lista
+            std::cout << "Descripcion del vehiculo: " << vehiculoEncontrado.descripcion << std::endl;
+            std::cout << "Disponibilidad: " << (vehiculoEncontrado.disponible ? "Disponible" : "No disponible") << std::endl;
+        } else {
+            std::cout << "El vehiculo con el ID ingresado no tiene informacion detallada." << std::endl;
+        }
+    } else {
+        std::cout << "El vehiculo no existe" << std::endl;
+    }
+}
+
 // Funcion para gestionar un vehiculo
 void gestionarVehiculo() {
     int opcion;
 
     do {
-        cout << "\n1. Agregar vehiculo\n2. Eliminar vehiculo\n3. Modificar vehiculo\n4. Regresar al menu principal\nIngrese una opcion: ";
+        cout << "\nGestion de Vehiculos\n"; // Cambiado para claridad
+        cout << "1. Agregar vehiculo\n";
+        cout << "2. Buscar vehiculo\n"; // Nueva opción
+        cout << "3. Eliminar vehiculo\n";
+        cout << "4. Modificar vehiculo\n";
+        cout << "5. Regresar al menu principal\n"; // Opción ajustada
+        cout << "Ingrese una opcion: ";
         cin >> opcion;
 
         switch (opcion) {
@@ -198,18 +247,21 @@ void gestionarVehiculo() {
                 agregarVehiculo();
                 break;
             case 2:
-                eliminarVehiculo();
+                buscarVehiculo();
                 break;
             case 3:
-                modificarVehiculo();
+                eliminarVehiculo();
                 break;
             case 4:
+                modificarVehiculo();
+                break;
+            case 5:
                 break;
             default:
                 cout << "Opcion no valida. Intente de nuevo." << endl;
                 break;
         }
-    } while (opcion != 4);
+    } while (opcion != 5);
 }
 
 
@@ -416,7 +468,6 @@ void gestionarAlmacenes() {
         }
     } while (opcion != 5);
 }
-
 
 // Funcion para salir del sistema
 void salir() {
