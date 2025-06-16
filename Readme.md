@@ -1,16 +1,27 @@
 # Análisis Inicial y Detección de Limitaciones
 
 <p>
-Comence con un análisis del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema maneja la información de pedidos, vehículos y almacenes. Durante esta fase, me percate de una limitación significativa en la función actualizarAlmacen(), que dependía de un std::vector para almacenar la información de los almacenes. Si bien  es funcional, esta elección presenta inconvenientes de eficiencia a medida que el volumen de datos aumenta.
+Comenzamos con un análisis exhaustivo del código fuente para identificar las estructuras de datos existentes y comprender cómo el sistema gestiona la información de pedidos, vehículos y almacenes. Durante esta fase, se identificó una limitación significativa en la función actualizarAlmacen(), que originalmente utilizaba un std::vector para almacenar la información de los almacenes. Aunque funcional, esta elección presenta inconvenientes de eficiencia a medida que el volumen de datos aumenta.
 </p>
 
-<p>
-Como parte de este proyecto, se busca que el estudiante se familiarice con las estructuras de datos lineales y no lineales, lo que le permitirá manejar tipos de datos abstractos más complejos y mejorar el rendimiento del software.
-</p>
+### Tipos de Estructuras de Datos Utilizadas
 
-<p>
-A continuación, se presenta una descripción de las estructuras de datos relevantes utilizadas y sus implicaciones:
-</p>
+A continuación, se describen las estructuras de datos relevantes encontradas en el sistema y sus implicaciones:
+
+#### Estructuras de Datos No Lineales
+
+- **`std::map<std::string, Pedido> pedidos_map;`**
+  - Representa un **árbol de búsqueda**. Su estructura subyacente es un árbol balanceado.
+  - Las **claves (IDs de los pedidos)** mantienen un orden, lo que permite búsquedas, inserciones y eliminaciones eficientes (O(logn)).
+- **`std::unordered_map<std::string, std::list<Vehiculo>> vehiculos_graph;`**
+  - Esta estructura se describe en el código como un **grafo**.
+  - Un `std::unordered_map` es una **tabla hash**. Aquí, se utiliza para representar relaciones donde cada clave (ID del vehículo) se asocia con una lista de vehículos (`std::list<Vehiculo>`). Las operaciones promedio son de O(1).
+
+#### Estructuras de Datos Lineales
+
+- **`std::vector<Almacen> almacenes;`** (Versión original)
+  - Los objetos `Almacen` se guardan uno tras otro, en un orden específico (similar a una lista o un arreglo).
+  - Permite la búsqueda y actualización de información de un almacén específico, pero con una eficiencia de O(n) para búsquedas y O(n) para inserciones y eliminaciones en el peor de los casos.
 
 ---
 
