@@ -25,15 +25,6 @@ A continuación, se describen las estructuras de datos relevantes encontradas en
 
 ---
 
-### Tipos de estructuras
-
-| Estructura de datos no lineales                                         |                                                                                                                                                                                                                                                           |
-| ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `std::map<std::string, Pedido> pedidos_map;`                            | Representa un **árbol de búsqueda** su estructura subyacente es un árbol. Las claves (IDs de los pedidos) mantienen un orden, lo que permite búsquedas, inserciones y eliminaciones eficientes                                                            |
-| `std::unordered_map<std::string, std::list<Vehiculo>> vehiculos_graph;` | Esta estructura se describe en el código como un **grafo**. Un `std::unordered_map` es una **tabla hash**. Aquí, se utiliza para representar la relación donde cada clave (ID del vehículo) se relaciona con una lista de vehículos `std::list<Vehiculo>` |
-| Estructura de datos lineal                                              |                                                                                                                                                                                                                                                           |
-| `std::vector<Almacen> almacenes;`                                       | Esto significa que los objetos `Almacen` se guardan uno tras otro, en un orden específico (similar a una lista o un arreglo). Permitir la búsqueda y actualización de información de un almacén específico.                                               |
-
 ### Análisis de funcionalidades del árbol `Pedido`
 
 | Nombre de la función | Descripción                                                                                                                                                                                                                            |
@@ -63,11 +54,9 @@ A continuación, se describen las estructuras de datos relevantes encontradas en
 
 ### Optimización de la Gestión de Almacenes
 
-<p>
-La mejora actual se centra en la función actualizarAlmacen, donde hemos pasado de utilizar un std::vector a un std::map<std::string, Almacen>. Esta elección estratégica de una estructura de datos no lineal (árbol de búsqueda) sentará las bases para futuras implementaciones de las funciones de agregar, eliminar y gestionar almacenes, dotando al software de mayor funcionalidad, versatilidad y robustez.
-</p>
+La mejora implementada se centra en la función actualizarAlmacen(), donde se ha realizado una transición de un `std::vector` a un `std::map<std::string, Almacen>`. Esta elección estratégica de una estructura de datos no lineal (árbol de búsqueda) sienta las bases para futuras implementaciones de funciones como agregar, eliminar y gestionar almacenes, dotando al software de mayor funcionalidad, versatilidad y robustez.
 
-<p>Código Comparativo:</p>
+### Código Comparativo:
 
 ```C++
 void actualizarAlmacen() {
@@ -125,48 +114,44 @@ if (itAlmacen != almacenes_map.end()) {
 }
 ```
 
+### Comparación de Eficiencia de Estructuras
+
 | Estructura                        | Búsqueda | Insersión                                                                                                        | Problema             | Posible Mejora                                 |
 | --------------------------------- | -------- | ---------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------- |
 | `std::vector<Almacen> almacenes;` | O(n)     | O(n) ordena los elementos de manera secuencial; es decir, al final de la lista o arreglo                         | La búsqueda es lenta | `std::map<std::string, Almacen> almacenes_map` |
 | `map<string, Pedido>`             | O(log n) | O(log n) Compara el dato con los que ya tiene y decide si va a la "izquierda" o a la "derecha" en su estructura. | N/A                  | Es óptimo                                      |
 | `std::unordered_map`              | O(1) avg | O (1) avg ordena los datos mediante una clave y un valor                                                         | N/A                  | Es eficiente                                   |
 
-<p>
-¿Por qué un árbol es más eficiente?
+**¿Por qué un Árbol es Más Eficiente?**
 
 Un árbol, al ser una estructura de datos dinámica y no lineal, permite un recorrido y búsqueda de datos considerablemente más eficiente que una estructura lineal como un std::vector (lista o arreglo).
 
-- Con un std::vector: Para encontrar un elemento específico, el sistema debe recorrer cada nodo uno por uno (O(n)), lo que resulta ineficiente si el elemento deseado se encuentra al final de la lista o si hay una gran cantidad de datos.
+    Con un std::vector: Para encontrar un elemento específico, el sistema debe recorrer cada nodo uno por uno (O(n)), lo que resulta ineficiente si el elemento deseado se encuentra al final de la lista o si hay una gran cantidad de datos.
 
-- Con un árbol binario (como std::map): Se realiza un descarte de datos de manera logarítmica (O(log n)). Por ejemplo, al buscar un almacén por su ID, el árbol compara el ID buscado con el nodo actual y decide si debe ir a la rama izquierda o derecha, descartando rápidamente la mitad de los datos restantes en cada paso. Esto se traduce en una búsqueda y actualización mucho más rápida, especialmente con grandes volúmenes de información.
-</p>
+    Con un árbol binario (como std::map): Se realiza un descarte de datos de manera logarítmica (O(logn)). Por ejemplo, al buscar un almacén por su ID, el árbol compara el ID buscado con el nodo actual y decide si debe ir a la rama izquierda o derecha, descartando rápidamente la mitad de los datos restantes en cada paso. Esto se traduce en una búsqueda y actualización mucho más rápida, especialmente con grandes volúmenes de información.
 
-### ¿Cómo es que un árbol es más eficiente?
+El ordenamiento implícito en un std::map se da por la propia estructura del árbol binario, que mantiene los elementos ordenados por sus claves (en este caso, los IDs de pedidos o almacenes) de forma ascendente. Esto no requiere un algoritmo de ordenamiento explícito como Bubble Sort, Select Sort o Insertion Sort, ya que el orden se mantiene intrínsecamente durante las inserciones.
+Propósito de actualizarAlmacen() y su Optimización
 
-<p>
-Un árbol es una estructura dinámica no lineal por lo que podemos recorrer el árbol de manera recursiva lo que hace el recorrido más eficiente en lugar de una lista que es una estructura lineal.
-</p>
+**Proposito de `actualizarAlmacen();` y su optimización**
+La función actualizarAlmacen() tiene como propósito principal guardar y actualizar los datos de los almacenes. Anteriormente, esta función dependía de un std::vector para almacenar los datos. Como se explicó, esta implementación resultaba ineficiente a medida que aumentaba la cantidad de datos en los almacenes.
 
-<p>
-Con un vector como una lista tenemos que recorrer forzosamente nodo por nodo hasta hallar el que nos interesa, si el almacén que necesitamos se encuentra cerca del final de la lista esto implica recorrer todos los almacenes anteriores lo que es más tardado.
-</p>
+Para resolver este inconveniente y mejorar drásticamente el rendimiento, se implementó un árbol binario auto-balanceado (std::map) para el almacenamiento de los almacenes. Con esta mejora, el ordenamiento y la búsqueda de los almacenes se siguen llevando a cabo eficientemente por medio de sus IDs, pero con una complejidad logarítmica que garantiza un mejor desempeño.
 
-<p>
-Con un árbol binario lo que podemos es ir realizando un descarte de datos en este caso se hace un descarte por medio del id del almacén comparando si es mayor o menor que el nodo actual para realizar un descarte más rápido y por ende eficiente.
-</p>
+---
 
-### Análisis de funcionalidades
+### Análisis de funcionalidades `unordered_map`
 
-- Identifica el método de ordenamiento utilizado implícitamente en la estructura de datos no lineal `std::map<std::string, Pedido> pedidos_map;`
+La estructura `unordered_map<string, Vehiculo> vehiculos_graph` en sí no cuenta con un método de ordenamiento, aunque a primera vista ordenada por el `id` cuando buscamos o iteramos sobre el grafo, el orden no está garantizado.
 
-- Aquí debo mencionar que la estructura no cuenta con un algoritmo de ordenamiento como pueden ser; Bubble Sort, Select Sort o Insertion Sort por mencionar algunos.
+`unordered_map` Lo que hace es, en el grafo, para almacenar los vehículos; usa el `id` para crear una lista que va a almacenar el vehículo dentro de ella.
 
-- El ordenamiento implícito se lo otorga la estructura no lineal con la que se están almacenando los datos que en este caso es un Árbol binario, el ordenamiento se realiza de manera ascendente por medio del ID del pedido.
+| Estructura      | Orden | Uso Actual | Problema                                                                                       | Mejora propuesta       |
+| --------------- | ----- | ---------- | ---------------------------------------------------------------------------------------------- | ---------------------- |
+| `unordered_map` | N/A   | Vehículos  | No se garantiza ni se puede predecir el orden de los elementos con cada ejecución del programa | Implementar `std::map` |
 
-### Examina la función actualizarAlmacen() y comprende su propósito
+### Propuesta de método de búsqueda
 
-- Anteriormente la estuctura que almacenaba los datos de actualizarAlmacen era un vector como se explico con anterioridad, su propósito es guardar los datos de los almacenes.
-
-- Como ya se ha comentado al llevar a cabo su función por medio de un vector esto se vuelve ineficiente a medida que tenemos más y más datos en los almecenes.
-
-- Para resolver este inconveniente se implemento un árbol binario auto- balanceado, dondé el ordenameinto se sigue llevando por medio del id de los almacenes.
+| Estructura | Orden    | Uso Actual | Solución                                                       | Mejora propuesta |
+| ---------- | -------- | ---------- | -------------------------------------------------------------- | ---------------- |
+| `std::map` | O(log n) | N/A        | No se garantiza ni se puede predecir el orden de los elementos | Ya es eficiente  |

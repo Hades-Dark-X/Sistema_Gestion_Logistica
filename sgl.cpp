@@ -33,8 +33,8 @@ struct Almacen {
 // Árbol para almacenar los pedidos (map ordenado por ID)
 std::map<std::string, Pedido> pedidos_map;
 
-// Grafo para almacenar los vehiculos (mapa no ordenado con listas de adyacencia)
-std::unordered_map<std::string, std::list<Vehiculo>> vehiculos_graph;
+// Cambio de estructura de grafo a árbol
+std::map<std::string, Vehiculo> vehiculos_map;
 
 // Basado en el árbol de pedidos usare la misma estructura no lineal para los almacenes
 std::map<std::string, Almacen> almacenes_map;
@@ -154,14 +154,13 @@ void eliminarVehiculo() {
     cout << "Ingrese el ID del vehiculo a eliminar: ";
     cin >> id;
 
-    // Eliminamos el vehiculo del grafo
-    if (vehiculos_graph.erase(id) > 0) {
+    // Eliminamos el vehiculo del mapa
+    if (vehiculos_map.erase(id) > 0) {
         cout << "Vehiculo eliminado exitosamente." << endl;
     } else {
         cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
     }
 }
-
 // Función para agregar un vehiculo
 void agregarVehiculo() {
     Vehiculo nuevoVehiculo;
@@ -170,13 +169,19 @@ void agregarVehiculo() {
     cin >> nuevoVehiculo.id;
     cin.ignore(); // Para limpiar el buffer de entrada
 
+    // Verificar si ya existe un vehículo con el mismo ID
+    if (vehiculos_map.count(nuevoVehiculo.id)) {
+        cout << "Ya existe un vehiculo con ese ID. Ingrese otro ID." << endl;
+        return;
+    }
+
     cout << "Ingrese la descripcion del vehiculo: ";
     getline(cin, nuevoVehiculo.descripcion);
 
     nuevoVehiculo.disponible = true;
 
-    // Agregamos el vehiculo al grafo
-    vehiculos_graph[nuevoVehiculo.id].push_back(nuevoVehiculo); 
+    // Agregamos el vehiculo al mapa
+    vehiculos_map[nuevoVehiculo.id] = nuevoVehiculo;
 
     cout << "Vehiculo agregado exitosamente." << endl;
 }
@@ -187,42 +192,32 @@ void modificarVehiculo() {
     cout << "Ingrese el ID del vehiculo a modificar: ";
     cin >> id;
 
-    auto it = vehiculos_graph.find(id);
-    if (it != vehiculos_graph.end()) {
-        for (auto& vehiculo : it->second) { // Iteramos sobre la lista de vehículos con el mismo ID
-            if (vehiculo.id == id) {
-                cout << "Ingrese la nueva descripcion del vehiculo: ";
-                cin.ignore();
-                getline(cin, vehiculo.descripcion);
-
-                cout << "Vehiculo modificado exitosamente." << endl;
-                return;
-            }
-        }
+    // Buscamos el vehiculo en el mapa
+    auto it = vehiculos_map.find(id);
+    if (it != vehiculos_map.end()) {
+        cout << "Ingrese la nueva descripcion del vehiculo: ";
+        cin.ignore();
+        getline(cin, it->second.descripcion); // Acceso directo al objeto Vehiculo
+        cout << "Vehiculo modificado exitosamente." << endl;
+    } else {
+        cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
     }
-
-    cout << "No se encontró el vehiculo con el ID proporcionado." << endl;
 }
 
 // Función para buscar un vehiculo
 void buscarVehiculo() {
-    // Solicitamos el ID del vehículo
     std::string idVehiculo;
     std::cout << "Ingrese el ID del vehiculo que desea buscar: ";
     std::cin >> idVehiculo;
 
-    // Realizamos la busqueda en el grafo de vehiculos
-    auto it = vehiculos_graph.find(idVehiculo);
+    // Realizamos la busqueda en el mapa de vehiculos
+    auto it = vehiculos_map.find(idVehiculo);
 
-    if (it != vehiculos_graph.end()) {
-        // En un grafo, la clave es el ID, y el valor es una lista de vehículos.
-        if (!it->second.empty()) {
-            const Vehiculo& vehiculoEncontrado = it->second.front(); // Tomamos el primer vehículo en la lista
-            std::cout << "Descripcion del vehiculo: " << vehiculoEncontrado.descripcion << std::endl;
-            std::cout << "Disponibilidad: " << (vehiculoEncontrado.disponible ? "Disponible" : "No disponible") << std::endl;
-        } else {
-            std::cout << "El vehiculo con el ID ingresado no tiene informacion detallada." << std::endl;
-        }
+    if (it != vehiculos_map.end()) {
+        // Acceso directo al objeto Vehiculo
+        const Vehiculo& vehiculoEncontrado = it->second;
+        std::cout << "Descripcion del vehiculo: " << vehiculoEncontrado.descripcion << std::endl;
+        std::cout << "Disponibilidad: " << (vehiculoEncontrado.disponible ? "Disponible" : "No disponible") << std::endl;
     } else {
         std::cout << "El vehiculo no existe" << std::endl;
     }
@@ -273,21 +268,18 @@ void asignarVehiculo() {
     cout << "Ingrese el ID del vehiculo: ";
     cin >> idVehiculo;
 
-    // Buscamos el pedido en el árbol de pedidos
     auto itPedido = pedidos_map.find(idPedido);
-    // Buscamos el vehiculo en el grafo
-    auto itVehiculo = vehiculos_graph.find(idVehiculo);
+    auto itVehiculo = vehiculos_map.find(idVehiculo); // Buscar en vehiculos_map
 
-    if (itPedido != pedidos_map.end() && itVehiculo != vehiculos_graph.end()) {
-        for (auto& vehiculo : itVehiculo->second) { // Iteramos sobre la lista de vehículos con el mismo ID
-            if (vehiculo.disponible) {
-                itPedido->second.idVehiculo = idVehiculo;
-                vehiculo.disponible = false;
-                cout << "Vehiculo asignado exitosamente al pedido." << endl;
-                return;
-            }
+    if (itPedido != pedidos_map.end() && itVehiculo != vehiculos_map.end()) {
+        // Acceso directo al objeto Vehiculo
+        if (itVehiculo->second.disponible) {
+            itPedido->second.idVehiculo = idVehiculo;
+            itVehiculo->second.disponible = false; // Actualizar disponibilidad del Vehiculo
+            cout << "Vehiculo asignado exitosamente al pedido." << endl;
+        } else {
+            cout << "El vehiculo con el ID " << idVehiculo << " no esta disponible." << endl;
         }
-        cout << "No hay vehículos disponibles con ese ID." << endl;
     } else {
         cout << "No se pudo asignar el vehiculo al pedido. Verifique los IDs ingresados." << endl;
     }
@@ -339,13 +331,22 @@ void planificarRuta() {
 
 // Funcion para verificar la disponibilidad de vehiculos
 void verificarDisponibilidad() {
-    for (const auto& pair : vehiculos_graph) {
-        for (const auto& vehiculo : pair.second) {
-            if (vehiculo.disponible) {
-                cout << "ID del vehiculo: " << vehiculo.id << endl;
-                cout << "Descripcion del vehiculo: " << vehiculo.descripcion << endl;
-            }
+    if (vehiculos_map.empty()) {
+        cout << "No hay vehiculos registrados." << endl;
+        return;
+    }
+    cout << "\nVehiculos Disponibles:\n";
+    bool foundAvailable = false;
+    for (const auto& pair : vehiculos_map) { // Itera sobre el mapa directamente
+        const Vehiculo& vehiculo = pair.second;
+        if (vehiculo.disponible) {
+            cout << "ID del vehiculo: " << vehiculo.id << endl;
+            cout << "Descripcion del vehiculo: " << vehiculo.descripcion << endl;
+            foundAvailable = true;
         }
+    }
+    if (!foundAvailable) {
+        cout << "No hay vehiculos disponibles en este momento." << endl;
     }
 }
 
