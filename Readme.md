@@ -152,6 +152,6 @@ La estructura `unordered_map<string, Vehiculo> vehiculos_graph` en sí no cuenta
 
 ### Propuesta de método de búsqueda
 
-| Estructura | Orden    | Uso Actual | Solución                                                       | Mejora propuesta |
-| ---------- | -------- | ---------- | -------------------------------------------------------------- | ---------------- |
-| `std::map` | O(log n) | N/A        | No se garantiza ni se puede predecir el orden de los elementos | Ya es eficiente  |
+| Estructura | Orden    | Uso Actual | Solución                                                          | Mejora propuesta |
+| ---------- | -------- | ---------- | ----------------------------------------------------------------- | ---------------- |
+| `std::map` | O(log n) | N/A        | Ahora los elementos se ordenan de manera ascendente gracias al id | Ya es eficiente  |
