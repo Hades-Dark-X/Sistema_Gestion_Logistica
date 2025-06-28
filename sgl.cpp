@@ -21,6 +21,8 @@ struct Vehiculo {
     string id;
     string descripcion;
     bool disponible;
+    string idAlmacenAsignado;
+    string idPedidoAsignado;
 };
 
 // Estructura para representar un almacen
@@ -179,6 +181,8 @@ void agregarVehiculo() {
     getline(cin, nuevoVehiculo.descripcion);
 
     nuevoVehiculo.disponible = true;
+    nuevoVehiculo.idAlmacenAsignado = "";
+    nuevoVehiculo.idPedidoAsignado = "";
 
     // Agregamos el vehiculo al mapa
     vehiculos_map[nuevoVehiculo.id] = nuevoVehiculo;
@@ -218,6 +222,8 @@ void buscarVehiculo() {
         const Vehiculo& vehiculoEncontrado = it->second;
         std::cout << "Descripcion del vehiculo: " << vehiculoEncontrado.descripcion << std::endl;
         std::cout << "Disponibilidad: " << (vehiculoEncontrado.disponible ? "Disponible" : "No disponible") << std::endl;
+         std::cout << "Asignado a almacén: " << (vehiculoEncontrado.idAlmacenAsignado.empty() ? "Ninguno" : vehiculoEncontrado.idAlmacenAsignado) << std::endl;
+        std::cout << "Asignado a pedido: " << (vehiculoEncontrado.idPedidoAsignado.empty() ? "Ninguno" : vehiculoEncontrado.idPedidoAsignado) << std::endl;
     } else {
         std::cout << "El vehiculo no existe" << std::endl;
     }
@@ -261,7 +267,7 @@ void gestionarVehiculo() {
 
 
 // Funcion para asignar un vehiculo a un pedido
-void asignarVehiculo() {
+void asignarVehiculoPedido() {
     string idPedido, idVehiculo;
     cout << "Ingrese el ID del pedido: ";
     cin >> idPedido;
@@ -321,8 +327,6 @@ void planificarRuta() {
         string idVehiculoAsignado = itPedido->second.idVehiculo;
         cout << "Ruta planificada para el pedido " << idPedido 
              << " con el vehiculo " << idVehiculoAsignado << endl;
-
-        // ... (Lógica real de planificación de ruta)
 
     } else {
         cout << "No se pudo planificar la ruta. Verifique que el ID del pedido es correcto y que tiene un vehiculo asignado." << endl;
@@ -437,6 +441,40 @@ void eliminarAlmacen() {
     }
 }
 
+void asignarVehiculoAalmacen() {
+    string idVehiculo, idAlmacen;
+    cout << "Ingrese el ID del vehiculo a asignar: ";
+    cin >> idVehiculo;
+    cout << "Ingrese el ID del almacen de destino: ";
+    cin >> idAlmacen;
+
+    auto itVehiculo = vehiculos_map.find(idVehiculo);
+    auto itAlmacen = almacenes_map.find(idAlmacen);
+
+    if (itVehiculo == vehiculos_map.end()) {
+        cout << "No se encontro el vehiculo con el ID ingresado." << endl;
+        return;
+    }
+
+    if (itAlmacen == almacenes_map.end()) {
+        cout << "No se encontro el almacen con el ID ingresado." << endl;
+        return;
+    }
+    // Verifica si el vehiculo esta asignado
+    if (!itVehiculo->second.idPedidoAsignado.empty()) {
+        cout << "El vehiculo " << itVehiculo->second.idPedidoAsignado << " esta actualmente asignado a un pedido. Desasigne primero del pedido." << endl;
+        return;
+    }
+    
+    if (!itVehiculo->second.idAlmacenAsignado.empty()) {
+        cout << "El vehiculo " << idVehiculo << " ya estaba asignado al almacen " << itVehiculo->second.idAlmacenAsignado << ". Reasignando..." << endl;
+    }
+
+    itVehiculo->second.idAlmacenAsignado = idAlmacen;
+    itVehiculo->second.disponible = true;
+    cout << "Vehiculo " << idVehiculo << " asignado exitosamente al almacen " << idAlmacen << "." << endl;
+}
+
 void gestionarAlmacenes() {
     int opcion;
     do {
@@ -489,7 +527,8 @@ int main() {
         cout << "5. Planificar ruta de transporte\n";
         cout << "6. Verificar disponibilidad de vehiculos\n";
         cout << "7. Gestionar almacen\n";
-        cout << "8. Salir\n";
+        cout << "8. Asignar vehiculo a Almacen\n";
+        cout << "9. Salir\n";
         cout << "Ingrese la opcion deseada: ";
         cin >> opcion;
 
@@ -501,7 +540,7 @@ int main() {
                 gestionarVehiculo();
                 break;
             case 3:
-                asignarVehiculo();
+                asignarVehiculoPedido();
                 break;
             case 4:
                 consultarEstado();
@@ -516,13 +555,16 @@ int main() {
                 gestionarAlmacenes();
                 break;
             case 8:
+                asignarVehiculoAalmacen();
+                break;
+            case 9:
                 salir();
                 break;
             default:
                 cout << "Opcion no valida. Por favor, intente de nuevo.\n";
                 break;
         }
-    } while (opcion != 8);
+    } while (opcion != 9);
 
     return 0;
 }

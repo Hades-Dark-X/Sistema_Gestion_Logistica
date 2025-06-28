@@ -155,3 +155,185 @@ La estructura `unordered_map<string, Vehiculo> vehiculos_graph` en sí no cuenta
 | Estructura | Orden    | Uso Actual | Solución                                                          | Mejora propuesta |
 | ---------- | -------- | ---------- | ----------------------------------------------------------------- | ---------------- |
 | `std::map` | O(log n) | N/A        | Ahora los elementos se ordenan de manera ascendente gracias al id | Ya es eficiente  |
+
+### Método de Búsqueda
+
+La función `asignarVehiculoAalmacen()` utiliza el método de búsqueda inherente a la estructura de datos `std::map`.
+
+**Búsqueda Directa por ID (Hash/Árbol Balanceado):** Tanto `vehiculos_map` como `almacenes_map` son de tipo `std::map<std::string`. Los `std::map` en C++ están implementados comúnmente como **árboles binarios de búsqueda auto-balanceados**
+
+Esta estructura garantiza que las operaciones de búsqueda, inserción y eliminación sean eficientes, con una complejidad de O(logN).
+
+Esto significa que la operación `find()`o encontrar (utilizada en `itVehiculo = vehiculos_map.find(idVehiculo)` y `itAlmacen = almacenes_map.find(idAlmacen)`) realiza una búsqueda logarítmica.
+
+- Cuando llamamos `vehiculos_map.find(idVehiculo)`, el mapa busca eficientemente el vehículo asociado con `idVehiculo`.
+
+- De manera similar, `almacenes_map.find(idAlmacen)` busca el almacén correspondiente a `idAlmacen`.
+
+### Explicación Detallada de las Verificaciones en `asignarVehiculoAalmacen()`
+
+La función `asignarVehiculoAalmacen()` implementa varias verificaciones cruciales para asegurar la integridad y la lógica del negocio antes de realizar la asignación de un vehículo a un almacén.
+
+Primero se verifica si el vehículo existe mediante un `if`
+
+```C++
+if (itVehiculo == vehiculos_map.end()) { cout << "No se encontro el vehiculo con el ID ingresado." << endl; return;
+```
+
+Con esto nos aseguramos que el `idVehiculo` proporcionado por el usuario realmente corresponde a un vehículo existente en el sistema.
+
+Usamos `vehiculos_map.find(idVehiculo)` para buscar el id. Si `find()` retorna `vehiculos_map.end()`, significa que la clave (`idVehiculo`) no fue encontrada en el mapa, indicando que el vehículo no existe. En este caso, se imprime un mensaje de error y la función termina.
+
+Después se verifica si el almacén existe.
+
+```C++
+if (itAlmacen == almacenes_map.end()) { cout << "No se encontro el almacen con el ID ingresado." << endl; return;
+}
+```
+
+Con lo anterior me aseguro de que el almacén exista mediante su id.
+
+El próximo paso es verificar si el vehículo que deseamos asignar se encuentra asignado previamente a un pedido.
+
+```C++
+if (!itVehiculo->second.idPedidoAsignado.empty()) { cout << "El vehiculo " << itVehiculo->second.idPedidoAsignado << " esta actualmente asignado a un pedido. Desasigne primero del pedido." << endl; return;
+}
+```
+
+Con esto se busca prevenir que un vehículo sea asignado a un almacén si ya está activamente asignado a un pedido.
+
+Procedimiento. Se accede a `idPedidoAsignado` del objeto `Vehiculo` (`itVehiculo->second.idPedidoAsignado`). Si esta cadena no está vacía (`!empty()`), significa que el vehículo tiene un pedido asignado, se notifica al usuario y se detiene la ejecución.
+
+Reasignación a un Almacén
+
+```C++
+if (!itVehiculo->second.idAlmacenAsignado.empty()) { cout << "El vehiculo " << idVehiculo << " ya estaba asignado al almacen " << itVehiculo->second.idAlmacenAsignado << ". Reasignando..." << endl;
+}
+```
+
+Se le avisa al usuario si el vehículo ya estaba asignado a otro almacén. Aunque no es una condición de error que impida la asignación, es una notificación útil para el usuario, confirmando que la operación de reasignación se está llevando a cabo.
+
+Cambios realizados a la función `main`
+Considerando que nuestra función main representa la interfaz a través de la cual el usuario interactúa con el software, se agregaron submenús a las opciones principales para que la interfaz fuese más clara y amigable para el usuario final.
+
+```C++
+int main() {
+    int opcion;
+    do {
+        cout << "\nSistema de Gestion Logistica\n";
+        cout << "1. Gestionar pedido\n";
+        cout << "2. Gestionar vehiculo\n";
+        cout << "3. Asignar vehiculo a pedido\n";
+        cout << "4. Consultar estado de envio\n";
+        cout << "5. Planificar ruta de transporte\n";
+        cout << "6. Verificar disponibilidad de vehiculos\n";
+        cout << "7. Gestionar almacen\n";
+        cout << "8. Asignar vehiculo a Almacen\n";
+        cout << "9. Salir\n";
+        cout << "Ingrese la opcion deseada: ";
+
+        cin >> opcion;
+
+
+
+        switch (opcion) {
+            case 1:
+                gestionarPedido();
+                break;
+
+            case 2:
+                gestionarVehiculo();
+                break;
+
+            case 3:
+                asignarVehiculoPedido();
+                break;
+
+            case 4:
+                consultarEstado();
+                break;
+
+            case 5:
+                planificarRuta();
+                break;
+
+            case 6:
+                verificarDisponibilidad();
+                break;
+
+            case 7:
+                gestionarAlmacenes();
+                break;
+
+            case 8:
+                asignarVehiculoAalmacen();
+                break;
+
+            case 9:
+                salir();
+                break;
+
+            default:
+                cout << "Opcion no valida. Por favor, intente de nuevo.\n";
+                break;
+        }
+
+    } while (opcion != 9);
+    return 0;
+}
+```
+
+Ejemplo de submenú
+
+```C++
+void gestionarVehiculo() {
+    int opcion;
+
+    do {
+        cout << "\nGestion de Vehiculos\n";
+        cout << "1. Agregar vehiculo\n";
+        cout << "2. Buscar vehiculo\n";
+        cout << "3. Eliminar vehiculo\n";
+        cout << "4. Modificar vehiculo\n";
+        cout << "5. Regresar al menu principal\n"; // Opción ajustada
+        cout << "Ingrese una opcion: ";
+
+        cin >> opcion;
+
+        switch (opcion) {
+            case 1:
+                agregarVehiculo();
+                break;
+
+            case 2:
+                buscarVehiculo();
+                break;
+
+            case 3:
+                eliminarVehiculo();
+                break;
+
+            case 4:
+                modificarVehiculo();
+                break;
+
+            case 5:
+                break;
+
+            default:
+                cout << "Opcion no valida. Intente de nuevo." << endl;
+                break;
+        }
+
+    } while (opcion != 5);
+
+}
+```
+
+### Reflexión.
+
+Entender que son y como se utilizan los métodos de búsqueda, permitió no solo hacer un código más eficiente, sino también al conocerlos podemos tener una idea más clara sobre en que circunstancias es más beneficioso el uso de uno u otro.
+
+Lo anterior de acuerdo a la aplicación que buscamos resolver, tomando en cuenta la modularización del código, la programación estructurada, la escalabilidad y la legibilidad.
+
+Todo lo anterior nos brindó conocimiento esencial sobre las estructuras de datos, nos dio buenas base sobre lo que es la programación orientada a objetos y sobre todo la forma en la que accedemos a los datos de una estructura, como es que podemos recuperar esos mismos datos y que tan importante resultan ser los algoritmos de búsqueda.
